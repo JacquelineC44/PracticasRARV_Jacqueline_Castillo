@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ChangeColor : MonoBehaviour
 {
-    public GameObject model;
+    public GameObject model;    
     public Color color;
     public Material colorMaterial;
     private Color colorOriginal;

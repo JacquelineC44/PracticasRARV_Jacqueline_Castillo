@@ -5,7 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Practica1_Jacqueline_Castillo.unity
     guid: f7386efa846ad244ab4214f6c491ba36
+  - enabled: 1
+    path: Assets/Practica2_Jacqueline_Castillo.unity
+    guid: 45ba292bc7aa2cd4f84293324eeae6a9
   m_configObjects: {}
