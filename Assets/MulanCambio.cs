@@ -13,6 +13,7 @@ public class MulanCambio : MonoBehaviour
     Color color;
     int antacces = -1;
     // Start is called before the first frame update
+
     void Start()
     {
         ropaOriginal = new Color[ropa.Length];
@@ -22,6 +23,7 @@ public class MulanCambio : MonoBehaviour
             ropaOriginal[i] = ropa[i].GetComponent<Renderer>().material.color;
         }
         materialOriginal = colorMaterial.color;
+        Random.InitState(System.DateTime.Now.GetHashCode());
     }
     public void ChangeColor_BTN()
     {
