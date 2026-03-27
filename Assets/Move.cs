@@ -13,9 +13,18 @@ public class Move : MonoBehaviour
     public Animator animator;
     public float rotationSpeed = 5f;
 
+    private Eventos eventosTargets;
+    private Mensajes mensajeE;
+
 
     // Start is called before the first frame update
-
+    void Start()
+    {
+        if (animator != null)
+            animator.SetBool("caminar", false);
+        eventosTargets = FindObjectOfType<Eventos>();
+        mensajeE = FindObjectOfType<Mensajes>();
+    }
     public void moveToNextMarker()
     {
         if (!isMoving) {
@@ -55,7 +64,18 @@ public class Move : MonoBehaviour
             model.transform.position = Vector3.Lerp(startPosition, endPosition, journey);
             yield return null;
         }
-        currentTarget = (currentTarget + 1) % ImageTargets.Length;
+        model.transform.SetParent(target.transform, true);
+        model.transform.localPosition = Vector3.zero;
+        currentTarget = System.Array.IndexOf(ImageTargets, target);
+        if (eventosTargets != null)
+        {
+            string mensaje = eventosTargets.TargetL(target);
+
+            Debug.Log(mensaje);
+
+            if (mensajeE != null)
+                mensajeE.MostrarMensaje(mensaje);
+        }
         if (animator != null)
             animator.SetBool("caminar", false);
         isMoving = false;
@@ -88,14 +108,12 @@ public class Move : MonoBehaviour
             {
                 extendedTrackedTarget = target;
             }
-
             // Guardar si el actual está EXTENDED_TRACKED
             if (isCurrent && status == Status.EXTENDED_TRACKED)
             {
                 currentExtendedTracked = target;
             }
         }
-
         // Si no hubo uno nuevo TRACKED, usa el actual TRACKED
         if (currentTracked != null)
             return currentTracked;
@@ -109,20 +127,8 @@ public class Move : MonoBehaviour
             return currentExtendedTracked;
 
         return null;
-
-        /*foreach(ObserverBehaviour target in ImageTargets)
-        {
-            if(target != null && (target.TargetStatus.Status == Status.TRACKED || target.TargetStatus.Status == Status.EXTENDED_TRACKED)){
-                return target;
-            }
-        }
-        return null;*/
     }
-    void Start()
-    {
-        if (animator != null)
-            animator.SetBool("caminar", false);
-    }
+    
     private void Update()
     {
     }

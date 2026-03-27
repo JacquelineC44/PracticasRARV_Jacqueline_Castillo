@@ -12,6 +12,7 @@ public class MulanCambio : MonoBehaviour
     private Color materialOriginal;
     Color color;
     int antacces = -1;
+    int index = -1;
     // Start is called before the first frame update
 
     void Start()
@@ -62,5 +63,20 @@ public class MulanCambio : MonoBehaviour
         } while (acces == antacces);
         antacces = acces;
         accesorios[acces].SetActive(true);
+    }
+    public void ChangeAccHist()
+    {
+        if (accesorios.Length == 0)
+            return;
+        for(int i = 0;i < accesorios.Length; i++)
+        {
+            accesorios[i].SetActive(false);
+        }
+        if(index <= accesorios.Length - 1)
+        {
+           index++;
+        }        
+        accesorios[index].SetActive(true);
+
     }
 }
