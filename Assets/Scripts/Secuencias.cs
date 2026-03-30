@@ -13,6 +13,7 @@ public class Secuencias : MonoBehaviour
     private PasoVisual[] pasosActuales;
     private int index;
     private bool secuenciaActiva;
+    private bool mostrarFinAlCerrar;
 
     public bool SecuenciaActiva => secuenciaActiva;
     private UIManager uiManager;
@@ -25,9 +26,14 @@ public class Secuencias : MonoBehaviour
     private void Awake()
     {
         secuenciaActiva = false;
+        mostrarFinAlCerrar = false;
 
         if (panel != null)
             panel.SetActive(false);
+    }
+    public void ConfigurarMostrarFinAlCerrar(bool valor)
+    {
+        mostrarFinAlCerrar = valor;
     }
 
     public void SigSuceso()
@@ -104,6 +110,18 @@ public class Secuencias : MonoBehaviour
     {
         StopAllCoroutines();
         secuenciaActiva = false;
-        uiManager.MostrarJuego();
+
+        if (panel != null)
+            panel.SetActive(false);
+
+        if (mostrarFinAlCerrar)
+        {
+            mostrarFinAlCerrar = false;
+            uiManager.MostrarFin();
+        }
+        else
+        {
+            uiManager.MostrarJuego();
+        }
     }
 }

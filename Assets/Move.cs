@@ -16,6 +16,11 @@ public class Move : MonoBehaviour
     private Eventos eventosTargets;
     private Mensajes mensajeE;
 
+    private ObserverBehaviour ultimaTarjetaValida;
+    private Vector3 ultimaPosicionLocal = Vector3.zero;
+    private Quaternion ultimaRotacionLocal = Quaternion.identity;
+    private Vector3 ultimaEscalaLocal = Vector3.one;
+
 
     // Start is called before the first frame update
     void Start()
@@ -24,6 +29,28 @@ public class Move : MonoBehaviour
             animator.SetBool("caminar", false);
         eventosTargets = FindObjectOfType<Eventos>();
         mensajeE = FindObjectOfType<Mensajes>();
+
+        foreach (var target in ImageTargets)
+        {
+            if (target != null)
+                target.OnTargetStatusChanged += OnTargetStatusChanged;
+        }
+
+        if (ImageTargets != null && currentTarget >= 0 && currentTarget < ImageTargets.Length)
+        {
+            if (ImageTargets[currentTarget] != null)
+            {
+                GuardarUltimaTarjeta(ImageTargets[currentTarget]);
+            }
+        }
+    }
+    void OnDestroy()
+    {
+        foreach (var target in ImageTargets)
+        {
+            if (target != null)
+                target.OnTargetStatusChanged -= OnTargetStatusChanged;
+        }
     }
     public void moveToNextMarker()
     {
@@ -40,6 +67,10 @@ public class Move : MonoBehaviour
         ObserverBehaviour target = GetNextDetectedTarget();
         if (target == null)
         {
+            if (animator != null)
+                animator.SetBool("caminar", false);
+
+            RestaurarEnUltimaTarjeta();
             isMoving = false;
             yield break;
         }
@@ -50,6 +81,15 @@ public class Move : MonoBehaviour
 
         while (journey <= 1f)
         {
+            if (target.TargetStatus.Status == Status.NO_POSE)
+            {
+                if (animator != null)
+                    animator.SetBool("caminar", false);
+
+                RestaurarEnUltimaTarjeta();
+                isMoving = false;
+                yield break;
+            }
             journey += Time.deltaTime * speed;
 
             Vector3 direction = endPosition - model.transform.position;
@@ -64,9 +104,11 @@ public class Move : MonoBehaviour
             model.transform.position = Vector3.Lerp(startPosition, endPosition, journey);
             yield return null;
         }
-        model.transform.SetParent(target.transform, true);
+        model.transform.SetParent(target.transform, false);
         model.transform.localPosition = Vector3.zero;
+        model.transform.localRotation = Quaternion.identity;
         currentTarget = System.Array.IndexOf(ImageTargets, target);
+        GuardarUltimaTarjeta(target);
         if (eventosTargets != null)
         {
             string mensaje = eventosTargets.TargetL(target);
@@ -128,8 +170,47 @@ public class Move : MonoBehaviour
 
         return null;
     }
-    
-    private void Update()
+    private void GuardarUltimaTarjeta(ObserverBehaviour target)
     {
+        if (target == null || model == null) return;
+
+        ultimaTarjetaValida = target;
+        ultimaPosicionLocal = model.transform.localPosition;
+        ultimaRotacionLocal = model.transform.localRotation;
+        ultimaEscalaLocal = model.transform.localScale;
+    }
+
+    private void RestaurarEnUltimaTarjeta()
+    {
+        if (ultimaTarjetaValida == null || model == null) return;
+
+        var status = ultimaTarjetaValida.TargetStatus.Status;
+        if (status != Status.TRACKED && status != Status.EXTENDED_TRACKED)
+            return;
+
+        model.transform.SetParent(ultimaTarjetaValida.transform, false);
+        model.transform.localPosition = ultimaPosicionLocal;
+        model.transform.localRotation = ultimaRotacionLocal;
+        model.transform.localScale = ultimaEscalaLocal;
+
+        currentTarget = System.Array.IndexOf(ImageTargets, ultimaTarjetaValida);
+    }
+
+    private void OnTargetStatusChanged(ObserverBehaviour behaviour, TargetStatus status)
+    {
+        if (behaviour == null || model == null) return;
+
+        bool esTarjetaActual = System.Array.IndexOf(ImageTargets, behaviour) == currentTarget;
+
+        if (esTarjetaActual && status.Status == Status.NO_POSE)
+        {
+            RestaurarEnUltimaTarjeta();
+        }
+
+        if (behaviour == ultimaTarjetaValida &&
+            (status.Status == Status.TRACKED || status.Status == Status.EXTENDED_TRACKED))
+        {
+            RestaurarEnUltimaTarjeta();
+        }
     }
 }

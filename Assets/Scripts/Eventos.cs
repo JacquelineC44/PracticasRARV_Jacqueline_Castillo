@@ -130,7 +130,7 @@ public class Eventos : MonoBehaviour
 
         if (correcta >= orden.Length)
         {
-            uiManager.MostrarFin();
+            return "Completaste todos los objetivos";
         }
 
         TipoSuceso sucesoEsperado = orden[correcta];
@@ -150,6 +150,14 @@ public class Eventos : MonoBehaviour
 
             correcta++;
             ActualizarMision();
+
+            bool juegoTerminado = correcta >= orden.Length;
+
+            if (secuenciaEvento != null)
+            {
+                secuenciaEvento.ConfigurarMostrarFinAlCerrar(juegoTerminado);
+            }
+
             StartCoroutine(MostrarSecuenciaConRetraso(evento));
 
             return mensaje;
