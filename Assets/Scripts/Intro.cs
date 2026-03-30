@@ -1,92 +1,80 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using System.Collections;
 
 public class Intro : MonoBehaviour
 {
-    [Header("UI")]
-    public GameObject panelInicio;
-    public GameObject panelIntro;
-    public Image imagenIntro;
-    public TMP_Text textoIntro;
-
-    [Header("Contenido")]
-    public Sprite[] imagenes;
-    [TextArea(2, 5)]
-    public string[] descripciones;
-
-    
-    public GameObject hud;
-
-    private int indiceActual = 0;
-    private bool introActiva = false;
-
+    public TextMeshProUGUI dialogos;
+    private UIManager uiManager;
+    private string[] lineas =
+    {
+        "Todo comenzo cuando la guerra se desató en china",
+        "Todos los hombres de cada familia tenían que ir a la guerra. Ese era el destino de tu padre al no haber tenido un hijo varón que lo sustituyera.",
+        "Solo con verlo, sabías que no sobreviviría.",
+        "Una noche antes de su partida, dicutiste con él. El estaba dispuesto a dar su vida.",
+        "Fue entonces que lo decidiste. No ibas a permitir que cumpliera ese destino, tomarías su lugar."
+    };
+    public float textSpeed = 0.1f;
+    int index;
+    public Image imagenFondo;
+    public Sprite[] fondos;
     void Start()
     {
-        panelIntro.SetActive(false);
-
-        if (hud != null)
-            hud.SetActive(false);
+        uiManager = FindObjectOfType<UIManager>();
+        dialogos.text = string.Empty;
+        StartDialogue();
     }
-
-    void Update()
+    public void Siguiente()
     {
-        if (!introActiva)
-            return;
-
-        if (Input.GetMouseButtonDown(0))
+        if (dialogos.text == lineas[index])
         {
-            SiguientePantalla();
+          NextLine();
+        }
+        else
+        {
+          StopAllCoroutines();
+          dialogos.text = lineas[index];
+        }
+        
+
+    }
+    public void StartDialogue()
+    {
+        index = 0;
+        CambiarFondo();
+        StartCoroutine(WriteLine());
+    }
+    IEnumerator WriteLine()
+    {
+        foreach (char letter in lineas[index].ToCharArray())
+        {
+            dialogos.text += letter;
+            yield return new WaitForSeconds(textSpeed);
+        }
+
+    }
+    public void NextLine()
+    {
+        if(index < lineas.Length - 1)
+        {
+            index++;
+            dialogos.text = string.Empty;
+            CambiarFondo();
+            StartCoroutine(WriteLine());
+        }
+        else
+        {
+            uiManager.MostrarJuego();
+        }
+    }
+    public void CambiarFondo()
+    {
+        if (imagenFondo != null && fondos != null && index < fondos.Length)
+        {
+            imagenFondo.sprite = fondos[index];
         }
     }
 
-    public void IniciarIntro()
-    {
-        if (imagenes.Length == 0 || descripciones.Length == 0)
-            return;
-
-        if (panelInicio != null)
-            panelInicio.SetActive(false);
-
-        indiceActual = 0;
-        introActiva = true;
-        panelIntro.SetActive(true);
-        MostrarPantallaActual();
-    }
-
-    void MostrarPantallaActual()
-    {
-        if (indiceActual < imagenes.Length)
-        {
-            imagenIntro.sprite = imagenes[indiceActual];
-            imagenIntro.preserveAspect = true;
-        }
-
-        if (indiceActual < descripciones.Length)
-        {
-            textoIntro.text = descripciones[indiceActual];
-        }
-    }
-
-    void SiguientePantalla()
-    {
-        indiceActual++;
-
-        if (indiceActual >= imagenes.Length || indiceActual >= descripciones.Length)
-        {
-            TerminarIntro();
-            return;
-        }
-
-        MostrarPantallaActual();
-    }
-
-    void TerminarIntro()
-    {
-        introActiva = false;
-        panelIntro.SetActive(false);
-
-        if (hud != null)
-            hud.SetActive(true);
-    }
 }

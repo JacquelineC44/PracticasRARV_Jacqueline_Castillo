@@ -4,16 +4,17 @@ using UnityEngine;
 
 public class Menu : MonoBehaviour
 {
-    public GameObject mainMenu;
-    public GameObject UIGame;
-    // Start is called before the first frame update
-    public void StartGame()
+
+    public void SalirJuego()
     {
-        mainMenu.SetActive(false);
-        UIGame.SetActive(true);
+        Debug.Log("Saliendo de la aplicación...");
+
+        Application.Quit();
+
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
     }
 
-    // Update is called once per frame
-    void Update(){
-    }
+
 }

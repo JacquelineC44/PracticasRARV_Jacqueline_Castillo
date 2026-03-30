@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using Vuforia;
+using TMPro;
 
 public class Eventos : MonoBehaviour
 {
@@ -30,13 +31,22 @@ public class Eventos : MonoBehaviour
     private int correcta = 0;
     private System.Random rnd;
     private Cambios mulan;
+    [SerializeField] private TextMeshProUGUI textoMision;
+
+    [SerializeField] private Secuencias secuenciaEvento;
+    [SerializeField] private SecuenciaPorSuceso[] secuencias;
+    [SerializeField] private float retrasoSecuencia = 3f;
+    private UIManager uiManager;
+
 
     void Start()
     {
         int semilla = (int)(DateTime.Now.Ticks % int.MaxValue);
         rnd = new System.Random(semilla);
+        uiManager = FindObjectOfType<UIManager>();
         mulan = FindAnyObjectByType<Cambios>();
         SucesosAleatorios();
+        ActualizarMision();
     }
     void SucesosAleatorios()
     {
@@ -64,6 +74,43 @@ public class Eventos : MonoBehaviour
                 sucesosPorTarget[imageTargets[i]] = TipoSuceso.Inicio;
         }
     }
+    private void ActualizarMision()
+    {
+        if (textoMision == null) return;
+
+        if (correcta >= orden.Length)
+        {
+            textoMision.text = "Misión completada. Ya terminaste todos los objetivos.";
+            return;
+        }
+
+        TipoSuceso sucesoActual = orden[correcta];
+        textoMision.text = ObtenerTextoMision(sucesoActual); ;
+    }
+
+    private string ObtenerTextoMision(TipoSuceso suceso)
+    {
+        switch (suceso)
+        {
+            case TipoSuceso.Escape:
+                return "Encuentra la espada para poder huir de casa.";
+
+            case TipoSuceso.Campamento:
+                return "Busca el campamento para comenzar tu entrenamiento.";
+
+            case TipoSuceso.Montana:
+                return "¡Rápido! Encuentra mushu para encender el cañon y detener al ejército enemigo.";
+
+            case TipoSuceso.Imperio:
+                return "Tienes que advertirle a tus compañeros. Encuentra la ciudad imperial ";
+
+            case TipoSuceso.Final:
+                return "Han secuestrado al emperador. Llega al enfrentamiento final y derrota a Shan Yu.";
+
+            default:
+                return "No hay misión disponible.";
+        }
+    }
     public TipoSuceso ObtenerSuceso(ObserverBehaviour target)
     {
         if (sucesosPorTarget.ContainsKey(target))
@@ -71,13 +118,19 @@ public class Eventos : MonoBehaviour
 
         return TipoSuceso.Inicio;
     }
+    private IEnumerator MostrarSecuenciaConRetraso(TipoSuceso suceso)
+    {
+        yield return new WaitForSeconds(retrasoSecuencia);
+        MostrarSecuenciaDeSuceso(suceso);
+    }
+
     public string TargetL(ObserverBehaviour target)
     {
         TipoSuceso evento = ObtenerSuceso(target);
 
         if (correcta >= orden.Length)
         {
-            return "Ya completaste todos los objetivos";
+            uiManager.MostrarFin();
         }
 
         TipoSuceso sucesoEsperado = orden[correcta];
@@ -96,6 +149,8 @@ public class Eventos : MonoBehaviour
             string mensaje = ObtenerMensajeDeExito(evento);
 
             correcta++;
+            ActualizarMision();
+            StartCoroutine(MostrarSecuenciaConRetraso(evento));
 
             return mensaje;
         }
@@ -111,19 +166,23 @@ public class Eventos : MonoBehaviour
             case TipoSuceso.Escape:
                 mulan.ChangeColor_BTN();
                 mulan.ChangeAccHist();
-                return "Has conseguido la espada. Ahora debes llegar al campamento";
+                return "¡Has conseguido la espada!";
             case TipoSuceso.Campamento:
                 mulan.ChangeColor_BTN();
-                return "Alcanzaste la flecha y completaste tu entrenamiento";
+                mulan.ChangeAccHist();
+                return "Completaste el entrenamiento";
             case TipoSuceso.Montana:
                 mulan.ChangeColor_BTN();
-                return "Conseguiste el cañon para vencer al ejercito enemigo";
+                mulan.ChangeAccHist();
+                return "Encontraste a mushu. Ahora puedes usar el cañon.";
             case TipoSuceso.Imperio:
                 mulan.ChangeColor_BTN();
-                return "Encontrate el caballo para regresar a la ciudad imperial";
+                mulan.ChangeAccHist();
+                return "Encontraste la ciudad imperial";
             case TipoSuceso.Final:
                 mulan.ChangeOriginal();
-                return "Haz vencido a Shan Yu";
+                mulan.ChangeAccHist();
+                return "Haz vencido a Shan Yu. Y el emperador te ha obsequiado su medallon para dar honor a tu familia.";
             default:
                 return "No encontraste nada";
         }
@@ -138,7 +197,7 @@ public class Eventos : MonoBehaviour
             case TipoSuceso.Campamento:
                 return "llegar al campamento";
             case TipoSuceso.Montana:
-                return "ir por el cañon";
+                return "Busca a Mushu para activar el cañon.";
             case TipoSuceso.Imperio:
                 return "Volver a la ciudad Imperial";
             case TipoSuceso.Final:
@@ -146,5 +205,37 @@ public class Eventos : MonoBehaviour
             default:
                 return "No hay suceso encontrado";
         }
+    }
+
+    private void MostrarSecuenciaDeSuceso(TipoSuceso suceso)
+    {
+        if (secuenciaEvento == null)
+        {
+            Debug.LogWarning("No hay referencia a SecuenciaEvento.");
+            return;
+        }
+
+        if (secuencias == null || secuencias.Length == 0)
+        {
+            Debug.LogWarning("No hay secuencias configuradas.");
+            return;
+        }
+
+        foreach (SecuenciaPorSuceso secuencia in secuencias)
+        {
+            if (secuencia.suceso == suceso)
+            {
+                if (secuencia.pasos == null || secuencia.pasos.Length == 0)
+                {
+                    Debug.LogWarning("El suceso " + suceso + " no tiene pasos configurados.");
+                    return;
+                }
+
+                secuenciaEvento.IniciarSecuencia(secuencia.pasos);
+                return;
+            }
+        }
+
+        Debug.LogWarning("No se encontró secuencia para el suceso: " + suceso);
     }
 }

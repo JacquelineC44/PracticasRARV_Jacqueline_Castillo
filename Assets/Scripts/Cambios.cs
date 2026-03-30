@@ -20,7 +20,7 @@ public class Cambios : MonoBehaviour
     private Color[] ropaOriginal;
     private Color materialOriginal;
     Color color;
-    public AccesorioData[] accesorios;
+    public GameObject[] accesorios;
     private GameObject accesorioActual;
     private int index = -1;
     private int antacces = -1;
@@ -63,31 +63,14 @@ public class Cambios : MonoBehaviour
     {
         if (accesorios == null || accesorios.Length == 0)
             return;
-
-        if (accesorioActual != null)
+        for (int i = 0; i < accesorios.Length; i++)
         {
-            Destroy(accesorioActual);
+            accesorios[i].SetActive(false);
         }
-
-        index++;
-
-        if (index >= accesorios.Length)
+        if (index <= accesorios.Length - 1)
         {
-            index = 0;
+            index++;
         }
-
-        ColocarAccesorio(index);
-    }
-    private void ColocarAccesorio(int i)
-    {
-        if (accesorios[i] == null || accesorios[i].prefab == null || accesorios[i].anchor == null)
-        {
-            Debug.LogWarning("Accesorio incompleto en índice: " + i);
-            return;
-        }
-        accesorioActual = Instantiate(accesorios[i].prefab, accesorios[i].anchor);
-        accesorioActual.transform.localPosition = accesorios[i].localPosition;
-        accesorioActual.transform.localRotation = Quaternion.Euler(accesorios[i].localRotation);
-        accesorioActual.transform.localScale = accesorios[i].localScale;
+        accesorios[index].SetActive(true);
     }
 }
