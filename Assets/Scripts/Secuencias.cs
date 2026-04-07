@@ -50,8 +50,6 @@ public class Secuencias : MonoBehaviour
         }
 
     }
-
-
     public void IniciarSecuencia(PasoVisual[] pasos)
     {
         if (pasos == null || pasos.Length == 0)

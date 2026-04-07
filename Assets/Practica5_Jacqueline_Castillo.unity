@@ -475,7 +475,7 @@ MonoBehaviour:
     - imagen: {fileID: 21300000, guid: 45e2cdf456e28d747bc3e1eef7cc17bf, type: 3}
       mensaje: Salvaste a todos, el emperador te da sus respetos.
     - imagen: {fileID: 21300000, guid: 57adbaf9d1573d546ab8adf8fe7098cf, type: 3}
-      mensaje: "\xA1Lo lograste! Ahora eres la her\xEDna de China."
+      mensaje: "\xA1Lo lograste! Ahora eres la hero\xEDna de China."
   retrasoSecuencia: 3
 --- !u!4 &200036566
 Transform:

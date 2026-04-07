@@ -17,7 +17,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Practica4_Jacqueline_Castillo.unity
     guid: 49017815a061d8e47babf00d70519b89
-  - enabled: 1
+  - enabled: 0
     path: Assets/cambiar/Practica5_Jacqueline_Castillo.unity
     guid: e4b32cafee11fcb418565aa0dec968e8
+  - enabled: 1
+    path: Assets/Practica5_Jacqueline_Castillo.unity
+    guid: bbb02599b3d95f04dbb7a3e6dffa81d6
   m_configObjects: {}

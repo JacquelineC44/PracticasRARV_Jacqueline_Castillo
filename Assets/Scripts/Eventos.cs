@@ -93,7 +93,7 @@ public class Eventos : MonoBehaviour
         switch (suceso)
         {
             case TipoSuceso.Escape:
-                return "Encuentra la espada para poder huir de casa.";
+                return "Colocate en el target d emushu y encuentra la espada para poder huir de casa.";
 
             case TipoSuceso.Campamento:
                 return "Busca el campamento para comenzar tu entrenamiento.";
